@@ -1,0 +1,35 @@
+# CDN Configuration Template
+# Copy this file to config.private and update the values
+
+# Project configuration
+PROJECT_NAME=fivem-cdn
+
+# Backend server configuration
+BACKEND_IP=example.com
+BACKEND_PORT=30120
+
+# CDN Configuration
+CDN_DOMAIN=cdn.example.com
+CDN_PORT=30120
+
+# Cache configuration
+CACHE_MEMORY=48m
+CACHE_MAX_SIZE=35g
+CACHE_INACTIVE=14d
+CACHE_VALIDITY=1y
+
+# Let's Encrypt configuration
+ADMIN_EMAIL=admin@example.com
+LETS_ENCRYPT_STAGING=true  # Set to true to use staging environment for testing 
+
+# Logging configuration
+ACCESS_LOG=/var/log/nginx/${PROJECT_NAME}.access.log
+ERROR_LOG=/var/log/nginx/${PROJECT_NAME}.error.log
+
+# Nginx configuration
+WORKER_CONNECTIONS=768
+WORKER_PROCESSES=auto 
+
+# NGINX Amplify configuration (optional)
+# AMPLIFY_API_KEY=your_api_key_here
+# AMPLIFY_UUID=${PROJECT_NAME}  # Optional: Will be auto-generated if not provided
