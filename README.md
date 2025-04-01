@@ -2,6 +2,18 @@
 
 A high-performance CDN server for FiveM servers, built with Nginx and Docker. Perfect for serving FiveM resources, assets, and files with blazing-fast speeds and efficient caching.
 
+## Table of Contents
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Detailed Setup Guide](#detailed-setup-guide)
+- [FiveM Server Configuration](#fivem-server-configuration)
+- [Configuration Options](#configuration-options)
+- [Security Features](#security-features)
+- [Monitoring](#monitoring)
+- [Maintenance](#maintenance)
+- [Troubleshooting](#troubleshooting)
+- [Support](#support)
 
 ## Features
 
@@ -58,39 +70,7 @@ chmod +x setup-cdn.sh && sudo ./setup-cdn.sh
 
 5. Your CDN is now ready! Visit https://your-cdn-domain to verify it's working.
 
-6. Configure your FiveM server in TxAdmin:
-   - Open your TxAdmin panel
-   - Navigate to your server configuration
-   - Add the following configuration:
-   ```cfg
-   # ==============================================
-   # CDN Configuration
-   # ==============================================
-
-   # Resource Caching Configuration
-   # This enables caching of all server resources through the CDN
-   set adhesive_cdnKey "your_secure_password_here"
-   fileserver_add ".*" "https://your-cdn-domain.com/files"
-
-   # Game Traffic Configuration
-   # Choose ONE of the following options:
-
-   # Option 1: Direct Traffic (Default)
-   # Players connect directly to your server
-   set sv_endpoints "your_server_ip:30120"
-
-   # Option 2: CDN Tunneling
-   # Routes traffic through the CDN for enhanced security and DDoS protection
-   # Note: May add slight latency due to additional routing
-   #set sv_endpoints "your-cdn-domain.com:30120"
-   ```
-
-   > **Quick Configuration Guide:**
-   > 1. Replace `your-cdn-domain.com` with your actual CDN domain
-   > 2. Replace `your_secure_password_here` with a strong password
-   > 3. Replace `your_server_ip` with your server's public IP address
-   > 4. Choose either direct traffic or CDN tunneling by uncommenting the appropriate `sv_endpoints` line
-   > 5. The CDN tunneling option is recommended for security benefits, not performance
+6. [Configure your FiveM server](#fivem-server-configuration) in TxAdmin.
 
 ## Detailed Setup Guide
 
@@ -157,14 +137,7 @@ WORKER_PROCESSES=auto
 # https://amplify.nginx.com/
 AMPLIFY_API_KEY=your_api_key_here
 AMPLIFY_UUID=${PROJECT_NAME}  # Optional: Will be auto-generated if not provided
-
 ```
-
-The setup script will validate all configuration values before proceeding, ensuring:
-* All required variables are set
-* Port numbers are valid (1-65535)
-* Email address format is valid
-* Required directories and files exist
 
 ### 3. Start the CDN
 
@@ -177,14 +150,6 @@ chmod +x setup-cdn.sh
 ```bash
 sudo ./setup-cdn.sh
 ```
-
-The setup script will:
-* Validate all configuration values
-* Create necessary directories with proper permissions
-* Set up the Docker environment
-* Configure firewall rules
-* Generate all required configuration files
-* Set up proper directory structure
 
 3. After the system reboots, navigate to the installation directory:
 ```bash
@@ -201,51 +166,82 @@ docker compose up -d
 ./init-ssl.sh
 ```
 
-The SSL setup script will:
-* Check if the container is running
-* Obtain SSL certificates from Let's Encrypt
-* Configure HTTPS
-* Verify the SSL setup
-* Restart the container if needed
-
 6. After the SSL setup completes, your CDN will be available at:
 ```
 https://${CDN_DOMAIN}
 ```
 
-7. Configure your FiveM server in TxAdmin:
-   - Open your TxAdmin panel
-   - Navigate to your server configuration
-   - Add the following configuration:
-   ```cfg
-   # ==============================================
-   # CDN Configuration
-   # ==============================================
+## FiveM Server Configuration
 
-   # Resource Caching Configuration
-   # This enables caching of all server resources through the CDN
-   set adhesive_cdnKey "your_secure_password_here"
-   fileserver_add ".*" "https://your-cdn-domain.com/files"
+Once your CDN is set up and running, you'll need to configure your FiveM server to use it. This configuration enables resource caching and optional game traffic tunneling through your CDN.
 
-   # Game Traffic Configuration
-   # Choose ONE of the following options:
+For detailed information about FiveM proxy setup, refer to the [official FiveM documentation](https://docs.fivem.net/docs/server-manual/proxy-setup/).
 
-   # Option 1: Direct Traffic (Default)
-   # Players connect directly to your server
-   set sv_endpoints "your_server_ip:30120"
+### 1. Access TxAdmin
+1. Open your TxAdmin panel
+2. Navigate to your server configuration
+3. Find the section where you can add custom configuration
 
-   # Option 2: CDN Tunneling
-   # Routes traffic through the CDN for enhanced security and DDoS protection
-   # Note: May add slight latency due to additional routing
-   #set sv_endpoints "your-cdn-domain.com:30120"
-   ```
+### 2. Add CDN Configuration
+Add the following configuration to your server.cfg:
 
-   > **Quick Configuration Guide:**
-   > 1. Replace `your-cdn-domain.com` with your actual CDN domain
-   > 2. Replace `your_secure_password_here` with a strong password
-   > 3. Replace `your_server_ip` with your server's public IP address
-   > 4. Choose either direct traffic or CDN tunneling by uncommenting the appropriate `sv_endpoints` line
-   > 5. The CDN tunneling option is recommended for security benefits, not performance
+```cfg
+# ==============================================
+# CDN Configuration
+# ==============================================
+
+# Resource Caching Configuration
+# This enables caching of all server resources through the CDN
+set adhesive_cdnKey "your_secure_password_here"
+fileserver_add ".*" "https://your-cdn-domain.com/files"
+
+# Game Traffic Configuration
+# Choose ONE of the following options:
+
+# Option 1: Direct Traffic
+# Players connect directly to your server
+set sv_endpoints "your_server_ip:30120"
+
+# Option 2: CDN Tunneling
+# Routes traffic through the CDN for enhanced security and DDoS protection
+# Note: May add slight latency due to additional routing
+#set sv_endpoints "your-cdn-domain.com:30120"
+```
+
+### 3. Configuration Details
+
+#### Resource Caching
+- `adhesive_cdnKey`: A secure password to authenticate with the CDN
+- `fileserver_add`: Enables caching for all server resources
+  - `".*"`: Matches all resource files
+  - `"https://your-cdn-domain.com/files"`: Your CDN's file server URL
+
+#### Game Traffic Options
+1. **Direct Traffic**
+   - Players connect directly to your server
+   - Lower latency for players near your server
+   - More server bandwidth usage
+   - Use: `set sv_endpoints "your_server_ip:30120"`
+
+2. **CDN Tunneling**
+   - Routes all traffic through the CDN
+   - Provides DDoS protection for your main server
+   - Hides your server's real IP address
+   - May add slight latency due to additional routing
+   - Use: `set sv_endpoints "your-cdn-domain.com:30120"`
+
+### 4. Important Notes
+- Replace `your-cdn-domain.com` with your actual CDN domain
+- Replace `your_secure_password_here` with a strong password
+- Replace `your_server_ip` with your server's public IP address
+- Make sure your CDN domain is properly configured in DNS
+- Choose the traffic option that best suits your needs based on your server's requirements
+- To disable the CDN temporarily or remove it, simply comment out the resource caching lines:
+  ```cfg
+  #set adhesive_cdnKey "your_secure_password_here"
+  #fileserver_add ".*" "https://your-cdn-domain.com/files"
+  ```
+- After making any changes to the CDN configuration, you must restart your FiveM server for the changes to take effect
 
 ## Configuration Options
 
@@ -267,6 +263,8 @@ The CDN is configured through the `config.private` file (not included in reposit
 * `CACHE_MAX_SIZE`: Maximum cache size (e.g., 35g)
 * `CACHE_INACTIVE`: Cache invalidation time (e.g., 14d)
 * `CACHE_VALIDITY`: Cache validity period (e.g., 1y)
+
+For detailed information about Nginx content caching, refer to the [official Nginx documentation](https://docs.nginx.com/nginx/admin-guide/content-cache/content-caching/).
 
 ### Let's Encrypt Configuration
 * `ADMIN_EMAIL`: Email address for Let's Encrypt notifications
@@ -556,78 +554,7 @@ For issues and support:
 1. Check the [GitHub Issues](https://github.com/Eps1337/fivem-cdn-docker/issues)
 2. Review the [NGINX Documentation](https://nginx.org/en/docs/)
 3. Check the [Docker Documentation](https://docs.docker.com/)
-
-## FiveM Server Configuration
-
-Once your CDN is set up and running, you'll need to configure your FiveM server to use it. This configuration enables resource caching and optional game traffic tunneling through your CDN.
-
-### 1. Access TxAdmin
-1. Open your TxAdmin panel
-2. Navigate to your server configuration
-3. Find the section where you can add custom configuration
-
-### 2. Add CDN Configuration
-Add the following configuration to your server.cfg:
-
-```cfg
-# ==============================================
-# CDN Configuration
-# ==============================================
-
-# Resource Caching Configuration
-# This enables caching of all server resources through the CDN
-set adhesive_cdnKey "your_secure_password_here"
-fileserver_add ".*" "https://your-cdn-domain.com/files"
-
-# Game Traffic Configuration
-# Choose ONE of the following options:
-
-# Option 1: Direct Traffic (Default)
-# Players connect directly to your server
-set sv_endpoints "your_server_ip:30120"
-
-# Option 2: CDN Tunneling
-# Routes traffic through the CDN for enhanced security and DDoS protection
-# Note: May add slight latency due to additional routing
-#set sv_endpoints "your-cdn-domain.com:30120"
-```
-
-### 3. Configuration Details
-
-#### Resource Caching
-- `adhesive_cdnKey`: A secure password to authenticate with the CDN
-- `fileserver_add`: Enables caching for all server resources
-  - `".*"`: Matches all resource files
-  - `"https://your-cdn-domain.com/files"`: Your CDN's file server URL
-
-#### Game Traffic Options
-1. **Direct Traffic**
-   - Players connect directly to your server
-   - Lower latency for players near your server
-   - More server bandwidth usage
-   - Use: `set sv_endpoints "your_server_ip:30120"`
-
-2. **CDN Tunneling**
-   - Routes all traffic through the CDN
-   - Provides DDoS protection for your main server
-   - Hides your server's real IP address
-   - May add slight latency due to additional routing
-   - Use: `set sv_endpoints "your-cdn-domain.com:30120"`
-
-### 4. Important Notes
-- Replace `your-cdn-domain.com` with your actual CDN domain
-- Replace `your_secure_password_here` with a strong password
-- Replace `your_server_ip` with your server's public IP address
-- Make sure your CDN domain is properly configured in DNS
-- Choose the traffic option that best suits your needs based on your server's requirements
-- To disable the CDN temporarily or remove it, simply comment out the resource caching lines:
-  ```cfg
-  #set adhesive_cdnKey "your_secure_password_here"
-  #fileserver_add ".*" "https://your-cdn-domain.com/files"
-  ```
-- After making any changes to the CDN configuration, you must restart your FiveM server for the changes to take effect
-
-> **Note:** Consider your server's specific needs when choosing between direct traffic and CDN tunneling. Direct traffic offers lower latency, while CDN tunneling provides additional security features.
+4. Review the [FiveM Documentation](https://docs.fivem.net/docs/server-manual/proxy-setup/)
 
 ## License
 
